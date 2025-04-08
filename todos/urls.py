@@ -18,11 +18,28 @@ from django.contrib import admin
 from django.urls import path
 from todos import views
 from rest_framework.urlpatterns import format_suffix_patterns
+from django.contrib import admin
+from django.urls import path
+from todos import views as todo_views
+from users.views import RegisterView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenBlacklistView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    path('auth/register/', RegisterView.as_view(), name='register'),
+    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+
     path('todos/',views.todo_list),
-    path('todos/<int:id>',views.todo_detail)
+    path('todos/<int:id>',views.todo_detail),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
+
+
