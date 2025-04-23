@@ -17,39 +17,45 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from todos import views as todo_views
-from users.views import RegisterView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
+from users.views import RegisterView,LogoutView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from todos import views
 from tasks import views as task_views  
 from rest_framework import permissions
 from tasks import urls as tasks_urls
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-# Swagger schema setup
+
 schema_view = get_schema_view(
-   openapi.Info(
-      title="Todo & Task Management API",
-      default_version='v1',
-      description="API documentation for Todos and Tasks with JWT Authentication",
-      terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="contact@example.com"),
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
-   permission_classes=[permissions.AllowAny],
+    openapi.Info(
+        title="Todo & Task Management API",
+        default_version='v1',
+        description="API documentation for Todos and Tasks with JWT Authentication",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@example.com"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+    authentication_classes=[],  # Important to make it public
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    # Auth
+    path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/logout/', LogoutView.as_view(), name='logout'),
+     
+    #Todos
+    path('todos/', todo_views.todo_list, name='todo-list'),
+    path('todos/<int:id>/', todo_views.todo_detail, name='todo-detail'),
 
-    path('auth/register/', RegisterView.as_view(), name='register'),
-    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
 
-    path('todos/', todo_views.todo_list),
-    path('todos/<int:id>/', todo_views.todo_detail),
-
+    # Tasks
     path('api/', include('tasks.urls')),
     
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
