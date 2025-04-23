@@ -6,6 +6,12 @@ from .models import Todo
 from .serializers import TodoSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.http import HttpResponse
+
+def welcome(request):
+    response_data="Welcome to my Todo Project"
+    return HttpResponse(response_data)
+
 
 @swagger_auto_schema(
     method='post',

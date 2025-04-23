@@ -42,6 +42,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path("",views.welcome,name="welcome"),
     path('admin/', admin.site.urls),
     
     # Auth
