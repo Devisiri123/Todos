@@ -172,5 +172,5 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
 }
 
-ALLOWED_HOSTS = ['https://todos-aujd.onrender.com','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['todos-aujd.onrender.com','localhost','127.0.0.1']
 
