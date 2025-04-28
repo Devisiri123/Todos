@@ -1,4 +1,3 @@
- 
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinLengthValidator
@@ -20,6 +19,7 @@ class Todo(models.Model):
         max_length=300,
         choices=STATUS_CHOICES
     )
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.task_name} - {self.task_progress}'

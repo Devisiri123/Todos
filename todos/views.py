@@ -12,21 +12,26 @@ def welcome(request):
     response_data="Welcome to my Todo Project"
     return HttpResponse(response_data)
 
-
-@swagger_auto_schema(
-    method='post',
-    request_body=TodoSerializer,
-    responses={201: TodoSerializer},
-)
 @swagger_auto_schema(
     method='get',
+    manual_parameters=[
+        openapi.Parameter('task_progress', openapi.IN_QUERY, description="Filter by task progress (Pending, InProgress, Completed)", type=openapi.TYPE_STRING)
+    ],
     responses={200: TodoSerializer(many=True)}
+)
+@swagger_auto_schema(
+    method='post', 
+    request_body=TodoSerializer,
+    responses={201: TodoSerializer},
 )
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def todo_list(request):
     if request.method == 'GET':
-        todos = Todo.objects.filter(user=request.user)
+        task_progress = request.GET.get('task_progress', None)  # Get from query param
+        todos = Todo.objects.filter(user=request.user, is_deleted=False)
+        if task_progress:
+            todos = todos.filter(task_progress=task_progress)
         serializer = TodoSerializer(todos, many=True)
         return Response(serializer.data)
 
@@ -36,7 +41,6 @@ def todo_list(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @swagger_auto_schema(
     method='get',
@@ -49,8 +53,9 @@ def todo_list(request):
 )
 @swagger_auto_schema(
     method='delete',
-    responses={204: openapi.Response('No Content')}
+    responses={204: openapi.Response('Task soft-deleted')}
 )
+
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def todo_detail(request, id):
@@ -71,10 +76,7 @@ def todo_detail(request, id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     elif request.method == 'DELETE':
-        todo.delete()
+        todo.is_deleted = True
+        todo.save()
         return Response({"message": "Task deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-
-
-
-
 
