@@ -12,5 +12,30 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+class SharedTask(models.Model):
+    PERMISSION_CHOICES = (
+        ('read', 'Read'),
+        ('edit', 'Edit'),
+    )
+
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='shared_tasks')
+    shared_with = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shared_tasks')
+    permission = models.CharField(max_length=10, choices=PERMISSION_CHOICES)
+
+    class Meta:
+        unique_together = ('task', 'shared_with')
+
+    def __str__(self):
+        return f"{self.shared_with.username} - {self.task.title} ({self.permission})"
+
+
+
+                   
+            
+
+
+
+
+
 
 
