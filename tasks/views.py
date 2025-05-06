@@ -13,7 +13,7 @@ class TaskListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         owned = Task.objects.filter(user=user)
-        shared = Task.objects.filter(shared_tasks__shared_with=user)
+        shared = Task.objects.filter(shared_tasks__shared_with=user, is_deleted=False)
         return (owned | shared).distinct()
 
     def perform_create(self, serializer):
@@ -33,7 +33,7 @@ class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Task.objects.filter(Q(user=user) | Q(shared_tasks__shared_with=user)).distinct()                
+        return Task.objects.filter(Q(user=user) | Q(shared_tasks__shared_with=user), is_deleted=False).distinct()               
 
     def perform_update(self, serializer):
         task = self.get_object()
@@ -53,13 +53,16 @@ class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_destroy(self, instance):
         if instance.user != self.request.user:
-            raise PermissionDenied("Only the task owner can delete it.")                                                  
-        instance.delete()
+            raise PermissionDenied("Only the task owner can delete it.")
+        instance.is_deleted = True
+        instance.save()
 
 class AllTasksListView(generics.ListAPIView):
-    queryset = Task.objects.all().order_by('-created_at')
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(is_deleted=False).order_by('-created_at')
 
 class ShareTaskView(generics.CreateAPIView):
     serializer_class = SharedTaskSerializer

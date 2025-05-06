@@ -1,5 +1,3 @@
-# tasks/serializers.py
-
 from rest_framework import serializers
 from .models import Task, SharedTask
 
@@ -9,7 +7,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = [
-            'id', 'title', 'description', 'is_completed',
+            'id', 'title', 'description', 'is_completed',     
             'created_at', 'updated_at', 'owner_username'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'owner_username']
